@@ -3814,7 +3814,11 @@ if (typeof window.Piwik !== 'object') {
                     return false;
                 }
 
-                return (requests && requests.length);
+                try {
+                    return (requests && requests.impressions;
+                } catch(e) {
+                    return (requests && requests.length);
+                }
             }
 
             function arrayChunk(theArray, chunkSize)
@@ -3853,7 +3857,7 @@ if (typeof window.Piwik !== 'object') {
 
                     var i = 0, bulk;
                     for (i; i < chunks.length; i++) {
-                        bulk = '{"requests":["?' + chunks[i].join('","?') + '"]}';
+                        bulk = JSON.stringify(chunks[i]);
                         sendXmlHttpRequest(bulk, null, false);
                     }
 
@@ -4393,11 +4397,7 @@ if (typeof window.Piwik !== 'object') {
                 }
 
                 // build out the rest of the request
-                request += '&idsite=' + configTrackerSiteId +
-                    '&rec=1' +
-                    '&r=' + String(Math.random()).slice(2, 8) + // keep the string to a minimum
-                    '&h=' + now.getHours() + '&m=' + now.getMinutes() + '&s=' + now.getSeconds() +
-                    '&url=' + encodeWrapper(purify(currentUrl)) +
+                request += '&url=' + encodeWrapper(purify(currentUrl)) +
                     (configReferrerUrl.length ? '&urlref=' + encodeWrapper(purify(configReferrerUrl)) : '') +
                     ((configUserId && configUserId.length) ? '&uid=' + encodeWrapper(configUserId) : '') +
                     '&_id=' + cookieVisitorIdValues.uuid + '&_idts=' + cookieVisitorIdValues.createTs + '&_idvc=' + cookieVisitorIdValues.visitCount +
@@ -4406,10 +4406,7 @@ if (typeof window.Piwik !== 'object') {
                     (campaignKeywordDetected.length ? '&_rck=' + encodeWrapper(campaignKeywordDetected) : '') +
                     '&_refts=' + referralTs +
                     '&_viewts=' + cookieVisitorIdValues.lastVisitTs +
-                    (String(cookieVisitorIdValues.lastEcommerceOrderTs).length ? '&_ects=' + cookieVisitorIdValues.lastEcommerceOrderTs : '') +
-                    (String(referralUrl).length ? '&_ref=' + encodeWrapper(purify(referralUrl.slice(0, referralUrlMaxLength))) : '') +
-                    (charSet ? '&cs=' + encodeWrapper(charSet) : '') +
-                    '&send_image=0';
+                    (String(referralUrl).length ? '&_ref=' + encodeWrapper(purify(referralUrl.slice(0, referralUrlMaxLength))) : '');
 
                 // browser features
                 for (i in browserFeatures) {
@@ -5019,7 +5016,7 @@ if (typeof window.Piwik !== 'object') {
                     return [];
                 }
 
-                var index, request;
+                var index, request, payload;
 
                 for (index = 0; index < contents.length; index++) {
 
@@ -5042,18 +5039,22 @@ if (typeof window.Piwik !== 'object') {
 
                 for (index = 0; index < contents.length; index++) {
 
-                    request = getRequest(
-                        content.buildImpressionRequestParams(contents[index].name, contents[index].piece, contents[index].target),
-                        undefined,
-                        'contentImpressions'
-                    );
+                    request = {
+                        'c_n': contents[index].name,
+                        'c_p': contents[index].piece
+                    };
 
-                    if (request) {
+                    if (request.c_n != 'Unknown')  {
                         requests.push(request);
                     }
                 }
 
-                return requests;
+                payload = {
+                    'request': getRequest(),
+                    'impressions': requests
+                };
+
+                return payload;
             }
 
             /*
