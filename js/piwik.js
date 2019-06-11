@@ -4493,10 +4493,6 @@ if (typeof window.Piwik !== 'object') {
                     }
                 }
 
-                if (configIdPageView) {
-                    request += '&pv_id=' + configIdPageView;
-                }
-
                 // update cookies
                 cookieVisitorIdValues.lastEcommerceOrderTs = isDefined(currentEcommerceOrderTs) && String(currentEcommerceOrderTs).length ? currentEcommerceOrderTs : cookieVisitorIdValues.lastEcommerceOrderTs;
                 setVisitorIdCookie(cookieVisitorIdValues);
